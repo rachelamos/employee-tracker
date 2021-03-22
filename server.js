@@ -18,7 +18,7 @@ connection.connect((err) => {
   start();
 });
 
-// Inquirer Prompts
+// Starts the app--gives user list of all choices for functions.
 const start = () => {
 inquirer
   .prompt(
