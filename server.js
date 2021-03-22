@@ -11,6 +11,13 @@ const connection = mysql.createConnection({
   database: 'emp_trackerDB',
 });
 
+// Connecting to MySQL Server & SQL Database
+connection.connect((err) => {
+  if (err) throw err;
+  console.log(`connected as id ${connection.threadId}`);
+  start();
+});
+
 // Inquirer Prompts
 const start = () => {
 inquirer
@@ -55,15 +62,49 @@ inquirer
 
         default:
           console.log(`Invalid action: ${answer.commands}`);
+          break;
       }
-      // switch case for each choice - find in Great Bay
-        connection.end();
-
     })
 };
-// Connecting to MySQL Server & SQL Database
-connection.connect((err) => {
-  if (err) throw err;
-  console.log(`connected as id ${connection.threadId}`);
+
+// Simple query that will display all employees - probably use console.table
+const viewAllEmployees = () => {
+  console.log('Will view all employees');
   start();
-});
+};
+
+// First inquirer prompt to display which dept, then simple query that will display all employees - probably use console.table
+const viewAllDepartments = () => {
+  console.log('Will view all departments');
+  start();
+};
+
+// First inquirer prompt to display which role, then simple query that will display all employees - probably use console.table
+const viewAllRoles = () => {
+  console.log('Will view all roles');
+  start();
+};
+
+// Insert information using query
+const addDepartment = () => {
+  console.log('Will add a department');
+  start();
+};
+
+// Insert information using query
+const addRole = () => {
+  console.log('Will add a role');
+  start();
+};
+
+// Insert information using query
+const addEmployee = () => {
+  console.log('Will add an employee');
+  start();
+};
+
+// Simple query that will display all employees - probably use console.table
+const updateEmployeeRole = () => {
+  console.log("Will update an employee's role");
+  start();
+};
