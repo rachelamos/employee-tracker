@@ -14,16 +14,48 @@ const connection = mysql.createConnection({
 // Inquirer Prompts
 const start = () => {
 inquirer
-  .prompt([
+  .prompt(
     {
       type: 'list',
       message: 'What would you like to do?',
       name: 'commands',
       choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role'],
     }
-  ])
+  )
   .then((answer) => {
       console.log("Success!");
+      switch(answer.commands) {
+        case 'View All Employees':
+          viewAllEmployees();
+          break;
+        
+        case 'View All Departments':
+          viewAllDepartments();
+          break;
+
+        case 'View All Roles':
+          viewAllRoles();
+          break;
+
+        case 'Add Department':
+          addDepartment();
+          break;
+
+        case 'Add Role':
+          addRole();
+          break;
+
+        case 'Add Employee':
+          addEmployee();
+          break;
+
+        case 'Update Employee Role':
+          updateEmployeeRole();
+          break;
+
+        default:
+          console.log(`Invalid action: ${answer.commands}`);
+      }
       // switch case for each choice - find in Great Bay
         connection.end();
 
