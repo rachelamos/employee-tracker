@@ -26,11 +26,11 @@ inquirer
       type: 'list',
       message: 'What would you like to do?',
       name: 'commands',
-      choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role'],
+      choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Exit'],
     }
   )
   .then((answer) => {
-      console.log("Success!");
+      // console.log("Success!");
       switch(answer.commands) {
         case 'View All Employees':
           viewAllEmployees();
@@ -60,6 +60,11 @@ inquirer
           updateEmployeeRole();
           break;
 
+        case 'Exit':
+          console.log("You've successfully exited the application.")
+          connection.end();
+          break;
+
         default:
           console.log(`Invalid action: ${answer.commands}`);
           break;
@@ -78,18 +83,29 @@ const viewAllEmployees = () => {
     res.forEach(( { first_name, last_name, title, salary }, i) => {
       const num = i + 1;
       console.table(
-        `${num} First Name: ${first_name} Last Name: ${last_name} || Title: ${title} || Salary: ${salary}`
+        `ID: ${num} || Name: ${first_name} ${last_name} || Title: ${title} || Salary: ${salary}`
       );
     });
     start();
   })
-  
 };
 
 // First inquirer prompt to display which dept, then simple query that will display all employees - probably use console.table
 const viewAllDepartments = () => {
   console.log('Will view all departments');
-  start();
+  let query = 
+    'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary ';
+  query +=
+    'FROM employee INNER JOIN role ON (employee.role_id = role.id)';
+  connection.query(query, (err, res) => {
+    res.forEach(( { first_name, last_name, title, salary }, i) => {
+      const num = i + 1;
+      console.table(
+        `ID: ${num} || Name: ${first_name} ${last_name} || Title: ${title} || Salary: ${salary}`
+      );
+    });
+    start();
+  })
 };
 
 // First inquirer prompt to display which role, then simple query that will display all employees - probably use console.table
