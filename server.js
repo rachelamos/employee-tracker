@@ -70,7 +70,20 @@ inquirer
 // Simple query that will display all employees - probably use console.table
 const viewAllEmployees = () => {
   console.log('Will view all employees');
-  start();
+  let query = 
+    'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary ';
+  query +=
+    'FROM employee INNER JOIN role ON (employee.role_id = role.id)';
+  connection.query(query, (err, res) => {
+    res.forEach(( { first_name, last_name, title, salary }, i) => {
+      const num = i + 1;
+      console.table(
+        `${num} First Name: ${first_name} Last Name: ${last_name} || Title: ${title} || Salary: ${salary}`
+      );
+    });
+    start();
+  })
+  
 };
 
 // First inquirer prompt to display which dept, then simple query that will display all employees - probably use console.table
