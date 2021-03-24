@@ -36,12 +36,12 @@ inquirer
           viewAllEmployees();
           break;
         
-        case 'View All Departments':
-          viewAllDepartments();
+        case 'View All Employees by Department':
+          viewAllEmpByDepartment();
           break;
 
-        case 'View All Roles':
-          viewAllRoles();
+        case 'View All Employees by Role':
+          viewAllEmpByRole();
           break;
 
         case 'Add Department':
@@ -76,14 +76,14 @@ inquirer
 const viewAllEmployees = () => {
   console.log('Will view all employees');
   let query = 
-    'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary ';
+    'SELECT employee.first_name, employee.last_name, role.title, role.salary, employee.manager ';
   query +=
     'FROM employee INNER JOIN role ON (employee.role_id = role.id)';
   connection.query(query, (err, res) => {
     res.forEach(( { first_name, last_name, title, salary }, i) => {
       const num = i + 1;
       console.table(
-        `ID: ${num} || Name: ${first_name} ${last_name} || Title: ${title} || Salary: ${salary}`
+        `ID: ${num} || Name: ${first_name} ${last_name} || Title: ${title} || Salary: ${salary} || Manager: ${manager}`
       );
     });
     start();
@@ -91,13 +91,21 @@ const viewAllEmployees = () => {
 };
 
 // First inquirer prompt to display which dept, then simple query that will display all employees - probably use console.table
-const viewAllDepartments = () => {
-  console.log('Will view all departments');
+const viewAllEmpByDepartment = () => {
+  console.log('Will view all employees by department');
+  inquirer
+  .prompt({
+    name: 'dept',
+    type: 'list',
+    message: "Which department's employees would you like to view?",
+    choices: ['Sales', 'Engineering', 'Legal']
+  })
+  .then((answer) => {
   let query = 
-    'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary ';
+    'SELECT employee.first_name, employee.last_name, role.title, role.salary ';
   query +=
     'FROM employee INNER JOIN role ON (employee.role_id = role.id)';
-  connection.query(query, (err, res) => {
+  connection.query(query, [answer.department, answer.employee], (err, res) => {
     res.forEach(( { first_name, last_name, title, salary }, i) => {
       const num = i + 1;
       console.table(
@@ -106,10 +114,11 @@ const viewAllDepartments = () => {
     });
     start();
   })
+})
 };
 
 // First inquirer prompt to display which role, then simple query that will display all employees - probably use console.table
-const viewAllRoles = () => {
+const viewAllEmpByRole = () => {
   console.log('Will view all roles');
   start();
 };
