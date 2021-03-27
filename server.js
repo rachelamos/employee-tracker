@@ -1,6 +1,7 @@
 // Dependencies
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const cTable = require('console.table');
 
 // Creating Connection to Server
 const connection = mysql.createConnection({
@@ -80,12 +81,19 @@ const viewAllEmployees = () => {
   query +=
     'FROM employee INNER JOIN role ON (employee.role_id = role.id)';
   connection.query(query, (err, res) => {
+    const empArray = []
     res.forEach(( { first_name, last_name, title, salary }, i) => {
       const num = i + 1;
-      console.table(
-        `ID: ${num} || Name: ${first_name} ${last_name} || Title: ${title} || Salary: ${salary}`
-      );
+      const empObject = {
+        "ID": num,
+        "First Name": first_name,
+        "Last Name": last_name,
+        "Title": title,
+        "Salary": salary,
+      }
+      empArray.push(empObject);
     });
+    console.table(empArray);
     start();
   })
 };
