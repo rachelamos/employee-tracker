@@ -27,7 +27,7 @@ const start = () => {
         type: 'list',
         message: 'What would you like to do?',
         name: 'commands',
-        choices: ['View All Employees', 'View All Employees by Department', 'View All Roles', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Exit'],
+        choices: ['View All Employees', 'View All Employees by Department', 'View All Employees by Role', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Exit'],
       }
     )
     .then((answer) => {
@@ -131,7 +131,32 @@ const viewAllEmpByDepartment = () => {
 // First inquirer prompt to display which role, then simple query that will display all employees - probably use console.table
 const viewAllEmpByRole = () => {
   console.log('Will view all roles');
-  start();
+  let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.salary '
+  query += 'FROM role INNER JOIN employee ON employee.role_id = role.id RIGHT JoIN department ON department.id = role.department_id '
+  query += 'WHERE ?'
+  inquirer
+  .prompt({
+    name: 'role',
+    type: 'list',
+    message: 'Which role would you like to view?',
+    choices: ["Salesperson", "Sales Lead", "Software Engineer", "Lead Enginer", "Lawyer", "Legal Team Lead"]
+  })
+  .then((answer) => {
+    connection.query(query, {title: answer.role}, (err, res)=> {
+      const empArray = []
+      res.forEach(( {id, first_name, last_name, salary },) => {
+        const empObject = {
+          "ID": id,
+          "First Name": first_name,
+          "Last Name": last_name,
+          "Salary": salary
+        }
+        empArray.push(empObject);
+      })
+      console.table(empArray);
+      start();
+    })
+  })
 };
 
 // Insert information using query
