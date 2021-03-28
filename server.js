@@ -27,7 +27,7 @@ const start = () => {
         type: 'list',
         message: 'What would you like to do?',
         name: 'commands',
-        choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Exit'],
+        choices: ['View All Employees', 'View All Employees by Department', 'View All Roles', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Exit'],
       }
     )
     .then((answer) => {
@@ -76,11 +76,11 @@ const start = () => {
 // Simple query that will display all employees - probably use console.table
 const viewAllEmployees = () => {
   console.log('Will view all employees');
-  let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, employee.manager_id, department.name'
-  query += 'CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee INNER JOIN role ON employee.role_id = role.id LEFT JOIN employee manager ON manager.id = employee.manager_id INNER JOIN department ON '
+  let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, employee.manager_id, department.name,'
+  query += 'CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM role INNER JOIN employee ON employee.role_id = role.id LEFT JOIN employee manager ON manager.id = employee.manager_id INNER JOIN department ON role.department_id = department.id;'
   connection.query(query, (err, res) => {
     const empArray = []
-    res.forEach(({ id, first_name, last_name, title, salary, manager },) => {
+    res.forEach(({ id, first_name, last_name, title, salary, manager, name },) => {
       const empObject = {
         "ID": id,
         "First Name": first_name,
@@ -88,6 +88,7 @@ const viewAllEmployees = () => {
         "Title": title,
         "Salary": salary,
         "Manager": manager,
+        "Department": name,
       }
       empArray.push(empObject);
     });
@@ -99,6 +100,9 @@ const viewAllEmployees = () => {
 // First inquirer prompt to display which dept, then simple query that will display all employees - probably use console.table
 const viewAllEmpByDepartment = () => {
   console.log('Will view all employees by department');
+  let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title '
+  query += 'FROM role INNER JOIN employee ON employee.role_id = role.id RIGHT JOIN department ON department.id = role.department_id '
+  query += 'WHERE ?'
   inquirer
     .prompt({
       name: 'dept',
@@ -107,17 +111,18 @@ const viewAllEmpByDepartment = () => {
       choices: ['Sales', 'Engineering', 'Legal']
     })
     .then((answer) => {
-      let query =
-        'SELECT ';
-      query +=
-        'FROM  INNER JOIN  ON ( = )';
-      connection.query(query, [answer.department, answer.employee], (err, res) => {
-        res.forEach(({ first_name, last_name, title, salary }, i) => {
-          const num = i + 1;
-          console.table(
-            `ID: ${num} || Name: ${first_name} ${last_name} || Title: ${title} || Salary: ${salary}`
-          );
+      connection.query(query, { name: answer.dept }, (err, res) => {
+        const empArray = [];
+        res.forEach(( {id, first_name, last_name, title } )=> {
+          const empObject = {
+            "ID": id,
+            "First Name": first_name,
+            "Last Name": last_name,
+            "Title": title,
+          }
+          empArray.push(empObject);
         });
+        console.table(empArray);
         start();
       })
     })
@@ -242,52 +247,52 @@ const addEmployee = () => {
 };
 
 // Simple query that will display all employees - probably use console.table
-const updateEmployeeRole = () => {
-  console.log("Will update an employee's role");
-  connection.query('SELECT * FROM employee', (err, res) => {
-    if (err) throw err;
-    inquirer
-      .prompt([
-        {
-          name: 'empFirstName',
-          type: 'list',
-          message: "Please select the first name of the employee whose role you'd like to update.",
-          choices() {
-            const firstNameArray = [];
-            for (let i = 0; i < res.length; i++) {
-              firstNameArray.push(`${i + 1} ${res[i].first_name}`);
-            }
-            return firstNameArray;
-          }
-        }
-      ])
-      .then((answer) => {
-        connection.query('UPDATE employee SET ? WHERE ? =', (err, res) => {
-          if (err) throw err;
-          inquirer
-            .prompt([
-              {
-                name: 'updateEmpRole',
-                type: 'list',
-                message: "Please select the role you'd like to update for the employee.",
-                choices() {
-                  const roleArray = [];
-                  for (let i = 0; i < res.length; i++) {
-                    roleArray.push(`${i + 1} ${res[i].title}`);
-                  }
-                  return roleArray;
-                }
-              },
-            ])
-            .then((answer) => {
-              connection.query('INSERT INTO role SET ?',
-                {
-                  title: answer.udateEmpRole.split('')[0],
-                },
-                (err) => {
-                  if (err) throw err;
-                  console.log("Your employee'sole has been updated.");
-                  start();
-                });
-            });
-        });
+// const updateEmployeeRole = () => {
+//   console.log("Will update an employee's role");
+//   connection.query('SELECT * FROM employee', (err, res) => {
+//     if (err) throw err;
+//     inquirer
+//       .prompt([
+//         {
+//           name: 'empFirstName',
+//           type: 'list',
+//           message: "Please select the first name of the employee whose role you'd like to update.",
+//           choices() {
+//             const firstNameArray = [];
+//             for (let i = 0; i < res.length; i++) {
+//               firstNameArray.push(`${i + 1} ${res[i].first_name}`);
+//             }
+//             return firstNameArray;
+//           }
+//         }
+//       ])
+//       .then((answer) => {
+//         connection.query('UPDATE employee SET ? WHERE ? =', (err, res) => {
+//           if (err) throw err;
+//           inquirer
+//             .prompt([
+//               {
+//                 name: 'updateEmpRole',
+//                 type: 'list',
+//                 message: "Please select the role you'd like to update for the employee.",
+//                 choices() {
+//                   const roleArray = [];
+//                   for (let i = 0; i < res.length; i++) {
+//                     roleArray.push(`${i + 1} ${res[i].title}`);
+//                   }
+//                   return roleArray;
+//                 }
+//               },
+//             ])
+//             .then((answer) => {
+//               connection.query('INSERT INTO role SET ?',
+//                 {
+//                   title: answer.udateEmpRole.split('')[0],
+//                 },
+//                 (err) => {
+//                   if (err) throw err;
+//                   console.log("Your employee'sole has been updated.");
+//                   start();
+//                 });
+//             });
+//        });
