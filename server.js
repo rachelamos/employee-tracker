@@ -113,7 +113,7 @@ const viewAllEmpByDepartment = () => {
     .then((answer) => {
       connection.query(query, { name: answer.dept }, (err, res) => {
         const empArray = [];
-        res.forEach(( {id, first_name, last_name, title } )=> {
+        res.forEach(({ id, first_name, last_name, title }) => {
           const empObject = {
             "ID": id,
             "First Name": first_name,
@@ -135,28 +135,28 @@ const viewAllEmpByRole = () => {
   query += 'FROM role INNER JOIN employee ON employee.role_id = role.id RIGHT JoIN department ON department.id = role.department_id '
   query += 'WHERE ?'
   inquirer
-  .prompt({
-    name: 'role',
-    type: 'list',
-    message: 'Which role would you like to view?',
-    choices: ["Salesperson", "Sales Lead", "Software Engineer", "Lead Enginer", "Lawyer", "Legal Team Lead"]
-  })
-  .then((answer) => {
-    connection.query(query, {title: answer.role}, (err, res)=> {
-      const empArray = []
-      res.forEach(( {id, first_name, last_name, salary },) => {
-        const empObject = {
-          "ID": id,
-          "First Name": first_name,
-          "Last Name": last_name,
-          "Salary": salary
-        }
-        empArray.push(empObject);
-      })
-      console.table(empArray);
-      start();
+    .prompt({
+      name: 'role',
+      type: 'list',
+      message: 'Which role would you like to view?',
+      choices: ["Salesperson", "Sales Lead", "Software Engineer", "Lead Enginer", "Lawyer", "Legal Team Lead"]
     })
-  })
+    .then((answer) => {
+      connection.query(query, { title: answer.role }, (err, res) => {
+        const empArray = []
+        res.forEach(({ id, first_name, last_name, salary },) => {
+          const empObject = {
+            "ID": id,
+            "First Name": first_name,
+            "Last Name": last_name,
+            "Salary": salary
+          }
+          empArray.push(empObject);
+        })
+        console.table(empArray);
+        start();
+      })
+    })
 };
 
 // Insert information using query
@@ -267,6 +267,54 @@ const addEmployee = () => {
             console.log('Your role has been added.');
             start();
           });
+      });
+  })
+};
+
+const updateEmployeeRole = () => {
+  connection.query('SELECT employee.role_id, CONCAT(first_name, " ", last_name) AS employee_name FROM employee INNER JOIN role ON employee.role_id = role.id', (err, res) => {
+    inquirer
+      .prompt([
+        {
+          name: 'name',
+          type: "list",
+          message: "What is the employee's name that needs the job title change?",
+          choices() {
+            const empArray = [];
+            res.forEach(({ employee_name }) => {
+              empArray.push(employee_name);
+            })
+            return empArray;
+          },
+        },
+        {
+          name: 'role',
+          type: "list",
+          message: "What is their new role?",
+          choices() {
+            const roleArray = [];
+            res.forEach(({ role_id }) => {
+              roleArray.push(role_id);
+            })
+            return roleArray;
+          },
+        }
+      ])
+      .then((answer) => {
+        connection.query(
+          'UPDATE employee SET ? WHERE ?',
+          [{
+            first_name: answer.name.split(' ')[0]
+          },
+          {
+            role_id: answer.role
+          }],
+          (err) => {
+            if (err) throw err;
+            console.log("The employee's role has been updated.");
+            start();
+          }
+        )
       });
   })
 };
