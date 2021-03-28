@@ -154,6 +154,8 @@ const addDepartment = () => {
 // Insert information using query
 const addRole = () => {
   console.log('Will add a role');
+  connection.query('SELECT * FROM department', (err, res) => {
+    if (err) throw err;
   inquirer
     .prompt([
       {
@@ -167,16 +169,23 @@ const addRole = () => {
         message: 'Please enter the salary of the role you just added.'
       },
       {
-        name: 'addRoleDepartment',
-        type: 'input',
-        message: 'Please name the department the role will be in.'
+        name: 'deptID',
+        type: 'list',
+        message: 'Please name the department the role will be in.',
+        choices() {
+          const deptArray = [];
+          for (let i = 0; i<res.length; i++){
+            deptArray.push(`${i+1} ${res[i].name}`);
+          }
+          return deptArray;
+        },
       }])
     .then((answer) => {
       connection.query('INSERT INTO role SET ?',
         {
           title: answer.addRole,
           salary: answer.addRoleSalary,
-          department_id: 
+          department_id: answer.deptID.split('')[0]
         },
         (err) => {
           if (err) throw err;
@@ -184,7 +193,7 @@ const addRole = () => {
           start();
         });
     });
-};
+})};
 
 // Insert information using query
 const addEmployee = () => {
