@@ -198,8 +198,46 @@ const addRole = () => {
 // Insert information using query
 const addEmployee = () => {
   console.log('Will add an employee');
-  start();
-};
+  connection.query('SELECT * FROM role', (err, res) => {
+    if (err) throw err;
+  inquirer
+    .prompt([
+      {
+        name: 'addEmpFirstName',
+        type: 'input',
+        message: "Please enter the first name of the employee you'd like to add.",
+      },
+      {
+        name: 'addEmpLastName',
+        type: 'input',
+        message: "Please enter the last name of the employee you'd like to add.",
+      },
+      {
+        name: 'roleID',
+        type: 'list',
+        message: 'Please name of the role the employee will have.',
+        choices() {
+          const roleArray = [];
+          for (let i = 0; i<res.length; i++){
+            roleArray.push(`${i+1} ${res[i].title}`);
+          }
+          return roleArray;
+        },
+      }])
+    .then((answer) => {
+      connection.query('INSERT INTO employee SET ?',
+        {
+          first_name: answer.addEmpFirstName,
+          last_name: answer.addEmpLastName,
+          role_id: answer.roleID.split('')[0]
+        },
+        (err) => {
+          if (err) throw err;
+          console.log('Your role has been added.');
+          start();
+        });
+    });
+})};
 
 // Simple query that will display all employees - probably use console.table
 const updateEmployeeRole = () => {
