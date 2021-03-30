@@ -272,7 +272,7 @@ const addEmployee = () => {
 };
 
 const updateEmployeeRole = () => {
-  connection.query('SELECT employee.role_id, CONCAT(first_name, " ", last_name) AS employee_name FROM employee INNER JOIN role ON employee.role_id = role.id', (err, res) => {
+  connection.query('SELECT role.title, employee.role_id, CONCAT(first_name, " ", last_name) AS employee_name FROM employee INNER JOIN role ON employee.role_id = role.id', (err, res) => {
     inquirer
       .prompt([
         {
@@ -293,8 +293,8 @@ const updateEmployeeRole = () => {
           message: "What is their new role?",
           choices() {
             const roleArray = [];
-            res.forEach(({ role_id }) => {
-              roleArray.push(role_id);
+            res.forEach(({ title }) => {
+              roleArray.push(title);
             })
             return roleArray;
           },
@@ -302,12 +302,12 @@ const updateEmployeeRole = () => {
       ])
       .then((answer) => {
         connection.query(
-          'UPDATE employee SET ? WHERE ?',
+          'UPDATE role SET ? WHERE ?',
           [{
-            first_name: answer.name.split(' ')[0]
+            title: answer.role
           },
           {
-            role_id: answer.role
+            first_name: answer.name.split(' ')[0]
           }],
           (err) => {
             if (err) throw err;
