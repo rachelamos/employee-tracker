@@ -27,7 +27,7 @@ From the terminal, enter 'npm start'.
 
 [Link to Application](https://github.com/rachelamos/employee-tracker.git)
 
-[Demo of My App](#)
+[Demo of My App](https://drive.google.com/file/d/1aN117cFIkp8CSk3SE-yVzWcWdGDme5aI/view)
 
 ### Questions
 If you have any other questions, you can reach me:

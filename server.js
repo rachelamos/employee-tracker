@@ -8,7 +8,7 @@ const connection = mysql.createConnection({
   host: 'localhost',
   port: 3306,
   user: 'root',
-  password: process.env.PASSWORD,
+  password: 'etemeo930',
   database: 'emp_trackerDB',
 });
 
@@ -270,54 +270,116 @@ const addEmployee = () => {
       });
   })
 };
-
-const updateEmployeeRole = () => {
-  connection.query('SELECT role.title, employee.role_id, CONCAT(first_name, " ", last_name) AS employee_name FROM employee INNER JOIN role ON employee.role_id = role.id', (err, res) => {
-    inquirer
-      .prompt([
-        {
-          name: 'name',
-          type: "list",
-          message: "What is the employee's name that needs the job title change?",
-          choices() {
-            const empArray = [];
-            res.forEach(({ employee_name }) => {
-              empArray.push(employee_name);
-            })
-            return empArray;
-          },
-        },
-        {
-          name: 'role',
-          type: "list",
-          message: "What is their new role?",
-          choices() {
-            const roleArray = [];
-            res.forEach(({ title }) => {
-              roleArray.push(title);
-            })
-            return roleArray;
-          },
-        }
-      ])
-      .then((answer) => {
-        connection.query(
-          'UPDATE role SET ? WHERE ?',
-          [{
-            title: answer.role
-          },
-          {
-            first_name: answer.name.split(' ')[0]
-          }],
-          (err) => {
-            if (err) throw err;
-            console.log("The employee's role has been updated.");
-            start();
-          }
-        )
-      });
+const updateEmployeeRole = () =>{
+  connection.query("SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee ;",  
+      function (err, empRes)  {
+        inquirer
+          .prompt([
+            {
+              name: 'name',
+              type: 'list',
+              message: 'Select employee?',
+              choices: function(){
+                    var empArray=[];
+                    console.log(empRes.length)
+                    for(let i=0; i < empRes.length; i++){
+                      empArray.push(empRes[i].Employee);
+                    }
+                    return empArray;
+                  }
+              },
+            ]).then(function(answer){
+                          let empId;
+                          for (let i=0; i < empRes.length; i++){
+                                if(empRes[i].Employee===answer.name){
+                                  empId=empRes[i].id;
+                                  console.log(empId);
+                                }
+                          }
+                      connection.query("SELECT * FROM role ORDER BY title;",
+                      function (err, res)  {
+                          inquirer
+                          .prompt([
+                                {name: 'role',
+                                  type: 'list',
+                                  message: "What is the employee's role?",
+                                  choices: function(){
+                                    var roleArray=[];
+                                    for(let i=0; i < res.length; i++){
+                                      roleArray.push(res[i].title);
+                                    }
+                                    return roleArray;
+                                  }
+                                  },
+                                ]).then (function (answer){
+                                  let roleId;
+                                  for (let i=0; i < res.length; i++){
+                                    if(res[i].title===answer.role){
+                                      roleId=res[i].id;
+                                      console.log(roleId);
+                                    }
+                                  }
+                                connection.query('UPDATE employee SET role_id=? WHERE id=?;',
+                                  [roleId, empId]
+                                  , function(err){
+                                    if (err) throw err;
+                                    console.log("Employee role updated")
+                                    start();
+                                  }
+                                )
+                          })
+                      })
+          })
   })
-};
+}
+
+// const updateEmployeeRole = () => {
+//   connection.query('SELECT role.title, employee.role_id, CONCAT(first_name, " ", last_name) AS employee_name FROM employee INNER JOIN role ON employee.role_id = role.id', (err, res) => {
+//     inquirer
+//       .prompt([
+//         {
+//           name: 'name',
+//           type: "list",
+//           message: "What is the employee's name that needs the job title change?",
+//           choices() {
+//             const empArray = [];
+//             res.forEach(({ employee_name }) => {
+//               empArray.push(employee_name);
+//             })
+//             return empArray;
+//           },
+//         },
+//         {
+//           name: 'role',
+//           type: "list",
+//           message: "What is their new role?",
+//           choices() {
+//             const roleArray = [];
+//             res.forEach(({ title }) => {
+//               roleArray.push(title);
+//             })
+//             return roleArray;
+//           },
+//         }
+//       ])
+//       .then((answer) => {
+//         connection.query(
+//           'UPDATE role SET ? WHERE ?',
+//           [{
+//             title: answer.role
+//           },
+//           {
+//             first_name: answer.name.split(' ')[0]
+//           }],
+//           (err) => {
+//             if (err) throw err;
+//             console.log("The employee's role has been updated.");
+//             start();
+//           }
+//         )
+//       });
+//   })
+// };
 
 // Simple query that will display all employees - probably use console.table
 // const updateEmployeeRole = () => {
